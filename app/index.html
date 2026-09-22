@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <p class="eyebrow">Operations dashboard</p>
+        <h1>Project Pulse</h1>
+        <p class="dashboard-intro">
+          A clear snapshot of active work, current delivery health, and priority signals across the portfolio.
+        </p>
+      </header>
+
+      <section class="dashboard-section" aria-labelledby="projects-heading">
+        <h2 id="projects-heading" class="section-heading">Active projects</h2>
+        <div id="state" class="state-panel" aria-live="polite">
+          <strong>Loading project pulse…</strong>
+          <span>Fetching the latest project activity and priority details.</span>
+        </div>
+        <div id="project-grid" class="project-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      const projectGrid = document.querySelector("#project-grid");
+      const statePanel = document.querySelector("#state");
+
+      const statusClassNames = {
+        "on track": "status-on-track",
+        "at risk": "status-at-risk",
+        "blocked": "status-blocked",
+        "monitoring": "status-monitoring"
+      };
+
+      const priorityClassNames = {
+        "critical": "priority-critical",
+        "high": "priority-high",
+        "medium": "priority-medium",
+        "low": "priority-low"
+      };
+
+      function normalizeValue(value) {
+        return String(value || "").trim();
+      }
+
+      function getTokenClass(value, classNames, fallbackClassName) {
+        const key = normalizeValue(value).toLowerCase();
+        return classNames[key] || fallbackClassName;
+      }
+
+      function setState(title, message) {
+        statePanel.hidden = false;
+        statePanel.replaceChildren();
+
+        const strong = document.createElement("strong");
+        strong.textContent = title;
+
+        const span = document.createElement("span");
+        span.textContent = message;
+
+        statePanel.append(strong, span);
+      }
+
+      function hideState() {
+        statePanel.hidden = true;
+        statePanel.replaceChildren();
+      }
+
+      function createBadge(label, value, className, fallbackValue) {
+        const badge = document.createElement("span");
+        const displayValue = normalizeValue(value) || fallbackValue;
+        badge.className = className;
+        badge.textContent = `${label}: ${displayValue}`;
+        return badge;
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const header = document.createElement("div");
+        header.className = "project-card-header";
+
+        const title = document.createElement("h3");
+        title.textContent = normalizeValue(project.name) || "Unnamed project";
+
+        const owner = document.createElement("p");
+        owner.className = "project-owner";
+
+        const ownerLabel = document.createElement("strong");
+        ownerLabel.textContent = "Owner: ";
+        owner.append(ownerLabel, normalizeValue(project.owner) || "Unassigned");
+
+        header.append(title, owner);
+
+        const meta = document.createElement("div");
+        meta.className = "project-meta";
+
+        const statusClassName = getTokenClass(project.status, statusClassNames, "status-unknown");
+        const priorityClassName = getTokenClass(project.priority, priorityClassNames, "priority-unknown");
+
+        const statusBadge = createBadge("Status", project.status, `status-badge ${statusClassName}`, "Unknown");
+        const priorityBadge = createBadge("Priority", project.priority, `priority-badge ${priorityClassName}`, "Unknown");
+
+        meta.append(statusBadge, priorityBadge);
+
+        const activity = document.createElement("p");
+        activity.className = "project-activity";
+
+        const activityLabel = document.createElement("strong");
+        activityLabel.textContent = "Recent activity: ";
+        activity.append(activityLabel, normalizeValue(project.recentActivity) || "No recent activity reported.");
+
+        card.append(header, meta, activity);
+        return card;
+      }
+
+      function renderProjects(projects) {
+        projectGrid.replaceChildren();
+
+        if (!Array.isArray(projects) || projects.length === 0) {
+          setState("No projects to show", "Project data loaded successfully, but the projects list is empty.");
+          return;
+        }
+
+        const cards = projects.map(createProjectCard);
+        projectGrid.append(...cards);
+        hideState();
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json", { cache: "no-store" });
+
+          if (!response.ok) {
+            throw new Error(`Project data request failed with status ${response.status}.`);
+          }
+
+          const data = await response.json();
+          renderProjects(data.projects);
+        } catch (error) {
+          projectGrid.replaceChildren();
+          setState(
+            "Unable to load projects",
+            `${error.message} Confirm the dashboard is served from the app directory and project-data.json is valid.`
+          );
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

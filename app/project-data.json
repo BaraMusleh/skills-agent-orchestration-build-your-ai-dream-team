@@ -1,0 +1,39 @@
+{
+  "projects": [
+    {
+      "name": "Atlas CRM Migration",
+      "owner": "Maya Chen",
+      "status": "On Track",
+      "recentActivity": "Completed customer import rehearsal and confirmed data quality thresholds with support leads.",
+      "priority": "High"
+    },
+    {
+      "name": "Beacon Mobile Refresh",
+      "owner": "Luis Romero",
+      "status": "At Risk",
+      "recentActivity": "Design QA found navigation regressions; engineering is pairing with product to reduce launch scope.",
+      "priority": "Critical"
+    },
+    {
+      "name": "Nimbus Analytics Rollout",
+      "owner": "Avery Patel",
+      "status": "On Track",
+      "recentActivity": "Published executive dashboard beta to regional directors and started feedback collection.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Harbor Security Review",
+      "owner": "Jordan Ellis",
+      "status": "Blocked",
+      "recentActivity": "Waiting on vendor remediation evidence before the final compliance sign-off can proceed.",
+      "priority": "High"
+    },
+    {
+      "name": "Summit Knowledge Base",
+      "owner": "Priya Nair",
+      "status": "Monitoring",
+      "recentActivity": "Article migration is complete; team is tracking search-result accuracy and support deflection.",
+      "priority": "Low"
+    }
+  ]
+}
